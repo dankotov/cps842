@@ -1,4 +1,4 @@
-from aux.term_parsing import *
+from auxiliary.term_parsing import *
 
 def find_closest_occurence_left(main_search_index, search_term, terms, words):
     i = main_search_index

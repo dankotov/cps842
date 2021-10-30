@@ -1,4 +1,4 @@
-import aux.collection_fields as collection_fields
+import auxiliary.collection_fields as collection_fields
 
 def is_a_doc_id_identifier(line):
     return (len(line) >= 2) and ((line[0]+line[1]) == collection_fields.DOC_ID)

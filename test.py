@@ -1,11 +1,11 @@
 import json
 import time
 
-import aux.collection_fields as collection_fields
-from aux.field_parsing import *
-from aux.term_parsing import *
-from aux.helper_fns import *
-from aux.search_context import *
+import auxiliary.collection_fields as collection_fields
+from auxiliary.field_parsing import *
+from auxiliary.term_parsing import *
+from auxiliary.helper_fns import *
+from auxiliary.search_context import *
 
 from nltk.stem import PorterStemmer
 
