@@ -1,10 +1,10 @@
 import json
 from nltk.stem import PorterStemmer
 from collections import OrderedDict
-import aux.collection_fields as collection_fields
-from aux.field_parsing import *
-from aux.term_parsing import *
-from aux.helper_fns import *
+import auxiliary.collection_fields as collection_fields
+from auxiliary.field_parsing import *
+from auxiliary.term_parsing import *
+from auxiliary.helper_fns import *
 
 # the dictionary - a python dictionary (hash map in fact)
 Dictionary = {}
