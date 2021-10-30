@@ -20,6 +20,20 @@ class VectorSpaceModel:
         unsorted_similarity = self.get_similarity_list()
         return sorted(unsorted_similarity, key=lambda l: l[sort_by], reverse=True)
 
+    def get_similarity_dictionary(self):
+        lst = self.get_similarity_list()
+        dict = {}
+        for value_pair in lst:
+            dict[value_pair[0]] = value_pair[1]
+        return dict
+
+    def get_sorted_similarity_dictionary(self, sort_by=1):
+        lst = self.get_sorted_similarity_list(sort_by=sort_by)
+        dict = {}
+        for value_pair in lst:
+            dict[value_pair[0]] = value_pair[1]
+        return dict
+
     def _set_document_numbering(self, document_numbering):
         documents_number = np.shape(self.documents)[0]
         if document_numbering is None:
@@ -84,7 +98,12 @@ if __name__ == "__main__":
     documents = [document3f, document5f, document6f]
     qf = np.array([1, 0, 1])
     N = 10000
+    # document_numbering will use a custom numbering that you provide for the document. For example, lets say you have document1, document3, document5
+    # if you do not provide numbering, the final answer will look like [0: sim1, 1:sim3, 2:sim5]. If you provide numbering np.array([3,5,6])
+    # then the final result will look like [3: sim1, 5:sim3, 6:sim5]. Provide numbering in order of the documents.
     vsm = VectorSpaceModel(
         documents, qf, N=N, raw_term_frequency=np.array([5000, 1000, 500]), document_numbering=np.array([3, 5, 6]))
     print("Unsorted similarity: ", vsm.get_similarity_list())
+    print("Unsorted dictionary: ", vsm.get_similarity_dictionary())
     print("Sorted similarity: ", vsm.get_sorted_similarity_list())
+    print("Sorted dictionary: ", vsm.get_sorted_similarity_dictionary(sort_by=1))
