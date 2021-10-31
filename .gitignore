@@ -2,3 +2,9 @@
 dictionary.json
 postings.json
 cacm_structured.json
+
+auxiliary/collection_fields/__pycache__/*
+auxiliary/field_parsing/__pycache__/*
+auxiliary/helper_fns/__pycache__/*
+auxiliary/search_context/__pycache__/*
+auxiliary/term_parsing/__pycache__/*
