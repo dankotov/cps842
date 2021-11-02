@@ -44,7 +44,9 @@ class VectorSpaceModel:
 
     def _set_raw_term_frequency(self, raw_term_frequency=None):
         if raw_term_frequency is None:
-            self.raw_term_frequency = np.sum(self.documents, axis=0)
+            documents_copy = self.documents.copy()
+            documents_copy[documents_copy != 0] = 1
+            self.raw_term_frequency = np.sum(documents_copy, axis=0)
         else:
             self.raw_term_frequency = raw_term_frequency
 
@@ -68,7 +70,9 @@ class VectorSpaceModel:
 
     def _compute_document_tf(self):
         self.d_tf = np.where((self.documents > 0),
-                             1 + np.log10(self.documents), self.documents)
+                             1 + np.log10(self.documents,
+                                          where=(self.documents > 0)),
+                             self.documents)
 
     def _compute_document_w(self):
         self.d_w = self.d_tf * self.idf
@@ -91,18 +95,19 @@ class VectorSpaceModel:
 
 
 if __name__ == "__main__":
-    document3f = np.array([4, 2, 1])
-    document5f = np.array([3, 4, 2])
-    document6f = np.array([1, 2, 3])
+    document1f = np.array([0, 0, 1, 0, 0, 1, 0, 1])
+    document2f = np.array([0, 0, 3, 1, 0, 1, 1, 0])
+    document3f = np.array([1, 1, 0, 0, 1, 0, 0, 1])
+    document4f = np.array([0, 2, 0, 0, 1, 1, 0, 0])
 
-    documents = [document3f, document5f, document6f]
-    qf = np.array([1, 0, 1])
+    documents = [document1f, document2f, document3f, document4f]
+    qf = np.array([0, 1, 0, 0, 0, 1, 0, 0])
     N = 10000
     # document_numbering will use a custom numbering that you provide for the document. For example, lets say you have document1, document3, document5
     # if you do not provide numbering, the final answer will look like [0: sim1, 1:sim3, 2:sim5]. If you provide numbering np.array([3,5,6])
     # then the final result will look like [3: sim1, 5:sim3, 6:sim5]. Provide numbering in order of the documents.
     vsm = VectorSpaceModel(
-        documents, qf, N=N, raw_term_frequency=np.array([5000, 1000, 500]), document_numbering=np.array([3, 5, 6]))
+        documents, qf, document_numbering=np.array([1, 2, 3, 4]))
     print("Unsorted similarity: ", vsm.get_similarity_list())
     print("Unsorted dictionary: ", vsm.get_similarity_dictionary())
     print("Sorted similarity: ", vsm.get_sorted_similarity_list())
