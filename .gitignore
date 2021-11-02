@@ -2,3 +2,4 @@
 dictionary.json
 postings.json
 cacm_structured.json
+__pycache__/
