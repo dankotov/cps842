@@ -16,8 +16,8 @@ documents_structured = {}
 term_doc_id_flags = {}
 
 # query for stopwords and stemming selection
-stopwords_removal_enabled = user_boolean_selection("Do you want to enable the stopwords removal? (y/n) ", "Stopwords removal enabled", "Stopwords removal disabled")
-stemming_enabled = user_boolean_selection("Do you want to enable stemming? (y/n) ", "Stemming enabled", "Stemming disabled")
+stopwords_removal_enabled = enable_stop_word_removal("Do you want to enable the stopwords removal? (y/n) ", "Stopwords removal enabled", "Stopwords removal disabled")
+stemming_enabled = enable_porter_stemmer("Do you want to enable stemming? (y/n) ", "Stemming enabled", "Stemming disabled")
 
 # open collection file for reading
 source_collection = open('./cacm/cacm.all', 'r')

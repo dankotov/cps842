@@ -77,7 +77,13 @@ def search(user_query, stemming_enabled, stopwords_removal_enabled):
         doc_tfs.append(0)
     rel_docs_tfs[doc_id] = doc_tfs
 
-  
+  if len(list(rel_docs_tfs.values())) == 0:
+    print("No results found")
+    return []
+
+  if len(np.array(list(query_tfs.values()))) == 0:
+    print("No results found")
+    return []
 
   vsm = VectorSpaceModel(
     documents=list(rel_docs_tfs.values()),

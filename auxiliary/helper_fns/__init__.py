@@ -1,6 +1,6 @@
 
 
-from config import Config
+import config
 import sys
 sys.path.append("..")  # Adds higher directory to python modules path.
 
@@ -19,16 +19,16 @@ def user_boolean_selection(query, confirmation, rejection):
 def enable_porter_stemmer(query, confirmation, rejection):
     response = user_boolean_selection(query, confirmation, rejection)
     if response:
-        Config.ENABLE_PORTER_STEMMER = True
+        config.change_stemming_option(True)
     elif not response:
-        Config.ENABLE_PORTER_STEMMER = False
-    print(Config.ENABLE_PORTER_STEMMER)
+        config.change_stemming_option(False)
+    return response
 
 
 def enable_stop_word_removal(query, confirmation, rejection):
     response = user_boolean_selection(query, confirmation, rejection)
     if response:
-        Config.ENABLE_STOP_WORD_REMOVAL = True
+        config.change_stop_word_removal_option(True)
     elif not response:
-        Config.ENABLE_STOP_WORD_REMOVAL = False
-    print(Config.ENABLE_STOP_WORD_REMOVAL)
+        config.change_stop_word_removal_option(False)
+    return response

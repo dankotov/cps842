@@ -17,6 +17,7 @@ from nltk.stem import PorterStemmer
 import numpy as np
 
 from search import search
+import config
 
 # read structured documents
 documents_structured_json = open('./cacm_structured.json', 'r')
@@ -24,8 +25,8 @@ documents_structured = json.load(documents_structured_json)
 documents_structured_json.close()
 
 # query user for stopword removal and stemming 
-stopwords_removal_enabled = user_boolean_selection("Was stopwords removal enabled when indexing? (y/n) ", "Stopwords removal was enabled", "Stopwords removal was disabled")
-stemming_enabled = user_boolean_selection("Was stemming enabled when indexing? (y/n) ", "Stemming was enabled", "Stemming was disabled")
+stopwords_removal_enabled = config.config['enable_stop_word_removal']
+stemming_enabled = config.config['enable_porter_stemmer']
 
 # search query
 user_query = input("Please input a query to search for: ")
