@@ -76,7 +76,8 @@ class Eval:
         for key in self.queries.keys():
             results = search(
                 self.queries[key], self.enable_stemming, self.enable_stop_word_removal)
-            results = list(results.keys())
+
+            results = list(results.keys()) if results != [] else []
             self.search_results[key] = [int(i) for i in results]
 
     def _calculate_average_precision(self, retrieved_documents, relevant_documents):
