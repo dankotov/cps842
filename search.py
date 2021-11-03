@@ -90,7 +90,7 @@ def search(user_query, stemming_enabled, stopwords_removal_enabled):
   return rel
 
 def compute_weight(tf, idf):
-  return tf * idf
+  return (1 + np.log10(tf)) * idf
 
 def compute_idf(N, df):
   return np.log10(N / df)
