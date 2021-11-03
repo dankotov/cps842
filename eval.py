@@ -7,10 +7,11 @@ from auxiliary.field_parsing import *
 from auxiliary.term_parsing import *
 from auxiliary.helper_fns import *
 from search import search
+from config import Config
 
 
 class Eval:
-    def __init__(self, queries_file='./cacm/query.text', query_results_file='./cacm/qrels.text', enable_stemming=True, enable_stop_word_removal=True):
+    def __init__(self, queries_file='./cacm/query.text', query_results_file='./cacm/qrels.text', enable_stemming=Config.ENABLE_PORTER_STEMMER, enable_stop_word_removal=Config.ENABLE_STOP_WORD_REMOVAL):
         # Queries
         self.queries = {}
         # Relevant documents
