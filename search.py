@@ -154,3 +154,5 @@ def search_old(user_query, stemming_enabled, stopwords_removal_enabled):
     )
     rel = vsm.get_sorted_similarity_dictionary(sort_by=1)
     return [int(doc_id) for doc_id in rel]
+
+

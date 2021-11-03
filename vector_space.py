@@ -3,6 +3,7 @@ import numpy as np
 
 class VectorSpaceModel:
     def __init__(self, documents, query_frequency, N=None, raw_term_frequency=None, document_numbering=None):
+        np.seterr(all='ignore')
         self.documents = np.array(documents)
         self.query_frequency = query_frequency
         self._set_raw_term_frequency(raw_term_frequency)
