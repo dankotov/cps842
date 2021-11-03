@@ -33,7 +33,7 @@ def search(user_query, stemming_enabled, stopwords_removal_enabled):
   if stopwords_removal_enabled:
     user_query = remove_stopwords(user_query)
 
-  query_terms = eliminate_index(1, user_query)
+  query_terms = process_query(user_query)
 
   query_terms_dfs = [Dictionary[term] for term in query_terms]
   
@@ -80,17 +80,12 @@ def search(user_query, stemming_enabled, stopwords_removal_enabled):
   
 
   vsm = VectorSpaceModel(
-      documents=list(rel_docs_tfs.values()),
-      document_numbering=np.array(list(rel_docs_tfs.keys())),
-      query_frequency=np.array(list(query_tfs.values())),
-      raw_term_frequency=np.array(query_terms_dfs),
-      N=3203
-    )
-  # vsm = VectorSpaceModel(
-  #     documents=list(rel_docs_tfs.values()),
-  #     document_numbering=np.array(list(rel_docs_tfs.keys())),
-  #     query_frequency=np.array(list(query_tfs.values())),
-  #   )
+    documents=list(rel_docs_tfs.values()),
+    document_numbering=np.array(list(rel_docs_tfs.keys())),
+    query_frequency=np.array(list(query_tfs.values())),
+    raw_term_frequency=np.array(query_terms_dfs),
+    N=3203
+  )
   rel = vsm.get_sorted_similarity_dictionary(sort_by=1)
   return rel
 
@@ -100,11 +95,10 @@ def compute_weight(tf, idf):
 def compute_idf(N, df):
   return np.log10(N / df)
 
-def eliminate_index(idf_threshold, query):
+def process_query(query):
   query_terms = {}
   for term in query:
-    if term in Dictionary and compute_idf(N=3203, df=Dictionary[term]) > idf_threshold:
-      # print(term, compute_idf(N=3203, df=Dictionary[term]), Dictionary[term])
+    if term in Dictionary:
       if term in query_terms:
         query_terms[term] = query_terms[term] + 1
       else:
