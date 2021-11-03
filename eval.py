@@ -6,6 +6,7 @@ import auxiliary.collection_fields as collection_fields
 from auxiliary.field_parsing import *
 from auxiliary.term_parsing import *
 from auxiliary.helper_fns import *
+from search import search
 
 
 class Eval:
@@ -22,37 +23,20 @@ class Eval:
         self._read_queries(queries_file)
         self._read_query_results(query_results_file)
 
-        # TODO: MAKE THIS FUNCTION WORK
-        # this function sets self.search_results as a dictionary in a form:
-        # {
-        # querynumber1 : [documentid1, documentid2, documentid3],
-        # querynumber2 : [documentid3, documentid2, documentid9, documentid12],
-        # }
-        # querynumbers and documentid's are both integers
         self._get_query_search_results()
 
-        # Example (numbers from the slides)
-        self.query_results = {
-            1: [123, 9, 56, 25, 3, 1, 1, 1, 1, 1],
-            2: [56, 129, 3]}
-        self.search_results = {
-            1: [123, 84, 56, 6, 8, 9, 511, 129, 187, 25, 38, 48, 250, 113, 3],
-            2: [425, 87, 56, 32, 124, 615, 512, 129, 4, 130, 193, 715, 810, 5, 3]
-        }
-        self.queries = {
-            1: ['hello'],
-            2: ['world'],
-        }
-
         self._calculate_mean_average_precision()
-        print(self.mean_average_precision)
         self._calculate_mean_r_precision()
-        print(self.mean_r_precision)
+
+    def get_map(self):
+        return self.mean_average_precision
+
+    def get_mrprecision(self):
+        return self.mean_r_precision
 
     def _read_queries(self, queries_file):
         queries_collection = open(queries_file, 'r')
         self.__read_sections_from_document(queries_collection)
-        self.__process_queries()
 
     def __read_sections_from_document(self, queries_collection):
         collection_line = queries_collection.readline()
@@ -70,6 +54,7 @@ class Eval:
         if 0 in self.queries.keys():
             del self.queries[0]
 
+    # depreciated
     def __process_queries(self):
         for key in self.queries:
             self.queries[key] = extract_terms(
@@ -86,7 +71,11 @@ class Eval:
             collection_line = query_results_collection.readline()
 
     def _get_query_search_results(self):
-        pass
+        for key in self.queries.keys():
+            results = search(
+                self.queries[key], self.enable_stemming, self.enable_stop_word_removal)
+            results = list(results.keys())
+            self.search_results[key] = [int(i) for i in results]
 
     def _calculate_average_precision(self, retrieved_documents, relevant_documents):
         running_sum = 0
@@ -95,7 +84,10 @@ class Eval:
             if retrieved_documents[i-1] in relevant_documents:
                 elements += 1
                 running_sum += elements/i
-        return running_sum/(len(relevant_documents))
+        if len(relevant_documents) > 0:
+            return running_sum/(len(relevant_documents))
+        else:
+            return None
 
     # this function complutes MAP across all queries from the files
     def _calculate_mean_average_precision(self):
@@ -103,8 +95,12 @@ class Eval:
         total_queries = len(self.queries.keys())
 
         for key in self.queries.keys():
-            running_precision_sum += self._calculate_average_precision(
+            precision = self._calculate_average_precision(
                 self.search_results[key], self.query_results[key])
+            if precision is not None:
+                running_precision_sum += precision
+            else:
+                total_queries-1
 
         if (total_queries > 0):
             self.mean_average_precision = running_precision_sum / total_queries
@@ -114,12 +110,17 @@ class Eval:
     def _calculate_r_precision(self, retrieved_documents, relevant_documents):
         relevant_count = 0
         r_d_set = set(relevant_documents)
-        for i in range(1, len(relevant_documents)+1):
+        iter_length = min(len(relevant_documents)+1,
+                          len(retrieved_documents)+1)
+
+        for i in range(1, iter_length):
             if retrieved_documents[i-1] in r_d_set:
                 relevant_count += 1
 
         if len(relevant_documents) > 0:
             return relevant_count / len(relevant_documents)
+        else:
+            return None
 
     # this function complutes MAP across all queries from the files
     def _calculate_mean_r_precision(self):
@@ -127,8 +128,12 @@ class Eval:
         total_queries = len(self.queries.keys())
 
         for key in self.queries.keys():
-            running_r_precision_sum += self._calculate_r_precision(
+            rprecision = self._calculate_r_precision(
                 self.search_results[key], self.query_results[key])
+            if rprecision is not None:
+                running_r_precision_sum += rprecision
+            else:
+                total_queries - 1
 
         if (total_queries > 0):
             self.mean_r_precision = running_r_precision_sum / total_queries
@@ -138,3 +143,5 @@ class Eval:
 
 if __name__ == "__main__":
     e = Eval()
+    print("MAP: ", e.get_map())
+    print("R-Precision: ", e.get_mrprecision())

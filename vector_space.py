@@ -10,6 +10,7 @@ class VectorSpaceModel:
         self._set_document_numbering(document_numbering)
 
         self._find_similarity()
+        self.similarity[np.isnan(self.similarity)] = 0
 
     def get_similarity_list(self):
         self.similarity_list = np.stack((
