@@ -25,7 +25,7 @@ def extract_terms(text, stemming):
 
 # remove stopwords in a list of terms
 def remove_stopwords(terms):
-    stopwords_file = open('common_words', 'r')
+    stopwords_file = open('./cacm/common_words', 'r')
     stopwords = dict.fromkeys(stopwords_file.read().splitlines())
     stopwords_file.close()
 
@@ -35,7 +35,7 @@ def remove_stopwords(terms):
 
 # build the dictionary and postings 
 def process_terms(text, doc_id, target_dict, target_post, term_doc_id_flags, stopwords_option, stemming_option, title_len=0):
-    stopwords_file = open('common_words', 'r')
+    stopwords_file = open('./cacm/common_words', 'r')
     stopwords = dict.fromkeys(stopwords_file.read().splitlines())
     stopwords_file.close()
 

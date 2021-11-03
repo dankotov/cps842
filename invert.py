@@ -20,7 +20,7 @@ stopwords_removal_enabled = user_boolean_selection("Do you want to enable the st
 stemming_enabled = user_boolean_selection("Do you want to enable stemming? (y/n) ", "Stemming enabled", "Stemming disabled")
 
 # open collection file for reading
-source_collection = open('./cacm.all', 'r')
+source_collection = open('./cacm/cacm.all', 'r')
 # read first collection line
 collection_line = source_collection.readline()
     
