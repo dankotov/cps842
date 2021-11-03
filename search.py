@@ -34,6 +34,8 @@ def search(user_query, stemming_enabled, stopwords_removal_enabled):
     user_query = remove_stopwords(user_query)
 
   query_terms = eliminate_index(1, user_query)
+
+  query_terms_dfs = [Dictionary[term] for term in query_terms]
   
   query_tfs = {}
   relevant_docs = set()
@@ -75,11 +77,20 @@ def search(user_query, stemming_enabled, stopwords_removal_enabled):
         doc_tfs.append(0)
     rel_docs_tfs[doc_id] = doc_tfs
 
+  
+
   vsm = VectorSpaceModel(
       documents=list(rel_docs_tfs.values()),
       document_numbering=np.array(list(rel_docs_tfs.keys())),
-      query_frequency=np.array(list(query_tfs.values()))
+      query_frequency=np.array(list(query_tfs.values())),
+      raw_term_frequency=np.array(query_terms_dfs),
+      N=3203
     )
+  # vsm = VectorSpaceModel(
+  #     documents=list(rel_docs_tfs.values()),
+  #     document_numbering=np.array(list(rel_docs_tfs.keys())),
+  #     query_frequency=np.array(list(query_tfs.values())),
+  #   )
   rel = vsm.get_sorted_similarity_dictionary(sort_by=1)
   return rel
 
