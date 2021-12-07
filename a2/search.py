@@ -28,7 +28,7 @@ documents_structured = json.load(documents_structured_json)
 documents_structured_json.close()
 
 def search(user_query, stemming_enabled, stopwords_removal_enabled):
-  # remove the stopwords from the query and stem terms, if booleans are set
+
   user_query = extract_terms(user_query, stemming_enabled)
   if stopwords_removal_enabled:
     user_query = remove_stopwords(user_query)
