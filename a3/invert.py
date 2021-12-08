@@ -58,14 +58,26 @@ for filename in os.listdir(source_collection_path):
                               stemming_option=stemming_enabled)
                 
 # write the dictionary, postings and structured documents into memory 
-dictionary_file = open('./parse_results/dictionary.json', 'w')
-json.dump(OrderedDict(sorted(Dictionary.items())), dictionary_file)
-dictionary_file.close()
+# dictionary_file = open('./parse_results/dictionary.json', 'w')
+# json.dump(OrderedDict(sorted(Dictionary.items())), dictionary_file)
+# dictionary_file.close()
 
-postings_file = open('./parse_results/postings.json', 'w')
-json.dump(OrderedDict(sorted(Postings.items())), postings_file)
-postings_file.close() 
+# postings_file = open('./parse_results/postings.json', 'w')
+# json.dump(OrderedDict(sorted(Postings.items())), postings_file)
+# postings_file.close() 
 
-documents_structured_file = open('./parse_results/documents_structured.json', 'w')
-json.dump(OrderedDict(sorted(documents_structured.items())), documents_structured_file)
-documents_structured_file.close() 
+# documents_structured_file = open('./parse_results/documents_structured.json', 'w')
+# json.dump(OrderedDict(sorted(documents_structured.items())), documents_structured_file)
+# documents_structured_file.close() 
+
+os.makedirs(os.path.dirname("./parse_results/dictionary.json"), exist_ok=True)
+with open("./parse_results/dictionary.json", "w") as dictionary_file:
+    json.dump(OrderedDict(sorted(Dictionary.items())), dictionary_file)
+
+os.makedirs(os.path.dirname("./parse_results/postings.json"), exist_ok=True)
+with open("./parse_results/postings.json", "w") as postings_file:
+    json.dump(OrderedDict(sorted(Postings.items())), postings_file)
+
+os.makedirs(os.path.dirname("./parse_results/documents_structured.json"), exist_ok=True)
+with open("./parse_results/documents_structured.json", "w") as documents_structured_file:
+    json.dump(documents_structured, documents_structured_file)
