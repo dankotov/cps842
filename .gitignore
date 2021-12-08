@@ -1,5 +1,7 @@
 __pycache__/
-cacm_structured.json
-dictionary.json
-postings.json
+**/cacm_structured.json
+**/dictionary.json
+**/postings.json
+**/doc_tfidf_vectors.json
+**/documents_structured.json
 __test.py

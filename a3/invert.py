@@ -1,4 +1,5 @@
 import json
+import os
 from nltk.stem import PorterStemmer
 from collections import OrderedDict
 import auxiliary.collection_fields as collection_fields
@@ -19,71 +20,52 @@ term_doc_id_flags = {}
 stopwords_removal_enabled = enable_stop_word_removal("Do you want to enable the stopwords removal? (y/n) ", "Stopwords removal enabled", "Stopwords removal disabled")
 stemming_enabled = enable_porter_stemmer("Do you want to enable stemming? (y/n) ", "Stemming enabled", "Stemming disabled")
 
-# open collection file for reading
-source_collection = open('./cacm/cacm.all', 'r')
-# read first collection line
-collection_line = source_collection.readline()
-    
-    
-# consecutively read and parse collection lines
-while(collection_line):
-    # strip line of the newline ending
-    collection_line = collection_line.rstrip('\n')
-    
-    # if this line is an identifier for the DOCID in the collection
-    if is_a_doc_id_identifier(collection_line):
-        # get the doc id
-        doc_id = int(collection_line.split(' ')[1])
-        # create a corresponding entry for this doc in the document_structured dictionary
-        documents_structured[doc_id] = {}
+# get current working directory
+cwd = os.getcwd()
+# set path for the soucre collection
+source_collection_path = os.path.join(cwd, "bbc")
 
-        collection_line = source_collection.readline()
+# iterate over all files in the source collection
+for filename in os.listdir(source_collection_path):
+    f = os.path.join(source_collection_path, filename)
+    #  if the current file is a directory
+    if os.path.isdir(f):
+        # loop over all files in that directory
+        for docname in os.listdir(f):
+            d = os.path.join(f, docname)
+            #  if current file is a text file
+            if os.path.isfile(d) and d.endswith(".txt"):
+                # create doc id from first 3 chars of class name and the number id of the doc
+                doc_id = filename[0 : 3] + docname.split(".txt")[0]
+                doc_text = ""
+                # read doc lines
+                curr_doc = open(d, 'r')
+                curr_doc_lines = curr_doc.readlines()
+                curr_doc.close()
+                # create a document entry (doc_id:title) in the docs structured file
+                documents_structured[doc_id] = curr_doc_lines[0].rstrip("\n")
+                # concatenate all lines into one
+                for line in curr_doc_lines:
+                    doc_text += line.replace("\n", " ")
 
-    # if the next line is an identifier for a title field 
-    elif collection_line == collection_fields.TITLE:
-        # parse the field to get the title and next line reference
-        title, collection_line = parse_field(source_collection)
-
-        # if title is not empty
-        if title != '':
-            # process title for terms
-            process_terms(title, doc_id, Dictionary, Postings, term_doc_id_flags, stopwords_removal_enabled, stemming_enabled)
-            # insert title attribute to the appropriate document id in the documents structutred dictionary
-            documents_structured[doc_id]['title'] = title
-    
-    # same, as previous elif, but for abstract 
-    elif collection_line == collection_fields.ABSTRACT:
-        abstract, collection_line = parse_field(source_collection)
-        if abstract != '':
-            title_len = len(documents_structured[doc_id]['title'].split(' ')) if 'title' in documents_structured[doc_id] else 0
-            process_terms(abstract, doc_id, Dictionary, Postings, term_doc_id_flags, stopwords_removal_enabled, stemming_enabled, title_len)
-        documents_structured[doc_id]['abstract'] = abstract
-    
-    # same, as previous elif, but for publication date
-    elif collection_line == collection_fields.PUBLICATION_DATE:
-        publication_date, collection_line = parse_field(source_collection)
-        documents_structured[doc_id]['pub_date'] = publication_date
-
-    # same, as previous elif, but for authors
-    elif collection_line == collection_fields.AUTHORS:
-        authors, collection_line = parse_field(source_collection)
-        documents_structured[doc_id]['authors'] = authors
-
-    # if the line is not a field of interest, move on to next line
-    else:
-        collection_line = source_collection.readline()
-
-source_collection.close()
-
+                # process terms
+                process_terms(text=doc_text,
+                              doc_id=doc_id,
+                              target_dict=Dictionary,
+                              target_post=Postings,
+                              term_doc_id_flags=term_doc_id_flags,
+                              stopwords_option=stopwords_removal_enabled,
+                              stemming_option=stemming_enabled)
+                
 # write the dictionary, postings and structured documents into memory 
-dictionary_file = open('dictionary.json', 'w')
+dictionary_file = open('./parse_results/dictionary.json', 'w')
 json.dump(OrderedDict(sorted(Dictionary.items())), dictionary_file)
 dictionary_file.close()
 
-postings_file = open('postings.json', 'w')
+postings_file = open('./parse_results/postings.json', 'w')
 json.dump(OrderedDict(sorted(Postings.items())), postings_file)
-postings_file.close()
+postings_file.close() 
 
-documents_structured_file = open('cacm_structured.json', 'w')
-json.dump(documents_structured, documents_structured_file)
-documents_structured_file.close()
+documents_structured_file = open('./parse_results/documents_structured.json', 'w')
+json.dump(OrderedDict(sorted(documents_structured.items())), documents_structured_file)
+documents_structured_file.close() 
