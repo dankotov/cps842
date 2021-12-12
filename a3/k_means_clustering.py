@@ -140,7 +140,7 @@ def get_tfidf_vectors(source='doc_tfidf_vectors.json'):
 #         clusters[d_id] = d_sim
 #     return clusters
 
-def match_id_to_document(ids, similarities):
+def match_id_to_document(ids, similarities, documents):
     id_to_title_json = open('./parse_results/documents_structured.json', 'r')
     id_to_title = json.load(id_to_title_json)
     id_to_title_json.close()
@@ -155,9 +155,16 @@ def match_id_to_document(ids, similarities):
 
     clusters = {}
 
-    for d_id, d_sim in zip(ids, similarities):
+    cluster_combined_tfidf = {}
+
+    for d_id, d_sim, document_tfidf in zip(ids, similarities, documents):
         if not d_sim in clusters:
             clusters[d_sim] = {}
+
+        if not d_sim in cluster_combined_tfidf:
+            cluster_combined_tfidf[d_sim] = document_tfidf
+        else:
+            cluster_combined_tfidf[d_sim] = cluster_combined_tfidf[d_sim] + document_tfidf
 
         if not "docs" in clusters[d_sim]:
             clusters[d_sim]["docs"] = {}
@@ -173,6 +180,20 @@ def match_id_to_document(ids, similarities):
         clusters[d_sim]["docs"][d_id]['title'] = id_to_title[d_id]
 
         clusters[d_sim]["class_summary"][doc_class] = clusters[d_sim]["class_summary"][doc_class] + 1
+    
+
+    dictionary_json = open('./parse_results/dictionary.json', 'r')
+    Dictionary = json.load(dictionary_json)
+    dictionary_json.close()
+
+    for cluster in clusters:
+        tfidf_vector = cluster_combined_tfidf[cluster]
+        tmp = np.argpartition(-tfidf_vector, 5)
+        highest_tfidfs_pos = tmp[:5]
+        clusters[cluster]["highest_idfs"] = []
+        for tfidf_pos in highest_tfidfs_pos:
+            clusters[cluster]["highest_idfs"].append(list(Dictionary.keys())[tfidf_pos])
+
 
     return clusters
 
@@ -225,7 +246,7 @@ if __name__ == '__main__':
     print('Done computing clusters. Operation took', end_time, 'seconds')
 
     clusters = match_id_to_document(
-        dict_ids, k_means.get_cluster_matrix().tolist())
+        dict_ids, k_means.get_cluster_matrix().tolist(), documents)
 
     # print(clusters)
     os.makedirs(os.path.dirname(
