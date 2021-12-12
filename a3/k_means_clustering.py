@@ -19,6 +19,7 @@ class KMeansClustering:
         self.centroids_per_try = []
         self.tightness_per_try = []
         self.tightness_per_try_per_cluster = []
+        self.best_tightness_index = None
 
         self._init_centroids()
 
@@ -43,8 +44,8 @@ class KMeansClustering:
         return self.clusters
 
     def _compute_best_result(self):
-        best_tightness_index = np.argmin(self.tightness_per_try)
-        self.centroids = self.centroids_per_try[best_tightness_index]
+        self.best_tightness_index = np.argmin(self.tightness_per_try)
+        self.centroids = self.centroids_per_try[self.best_tightness_index]
         self._single_pass()
 
     def _compute_tightness_per_cluster(self):
@@ -123,6 +124,9 @@ class KMeansClustering:
             new_centroids.append(centroid)
         self.prev_centroids = self.centroids
         self.centroids = np.array(new_centroids)
+
+    def get_final_tightness_per_cluster(self):
+        return self.tightness_per_try_per_cluster[self.best_tightness_index]
 
 
 def get_tfidf_vectors(source='doc_tfidf_vectors.json'):
@@ -255,6 +259,8 @@ if __name__ == '__main__':
 
     end_time = time.time() - start_time
     print('Done computing clusters. Operation took', end_time, 'seconds')
+    print('Final tightness of each cluster:\n ',
+          list(enumerate(k_means.get_final_tightness_per_cluster())))
 
     clusters = match_id_to_document(
         dict_ids, k_means.get_cluster_matrix().tolist(), documents)
