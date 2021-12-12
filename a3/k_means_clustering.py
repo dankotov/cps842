@@ -103,6 +103,14 @@ class KMeansClustering:
     def _compute_class_cosine_similarity(self) -> np.ndarray:
         return self.documents @ self.centroids.T
 
+    def _compute_true_cosine_similarity(self) -> np.ndarray:
+        top = (self.documents @ self.centroids.T)
+        bot_d = np.linalg.norm(self.documents, axis=1)
+        tiled_d = np.tile(bot_d, [self.num_clusters, 1])
+        bot_cent = np.linalg.norm(self.centroids, axis=1)
+        bot = tiled_d.T * bot_cent.reshape(1, -1)
+        return top/bot
+
     def _get_clusters_from_similarity(self, similarity: np.ndarray) -> np.ndarray:
         return np.argmax(similarity, axis=1)
 
@@ -210,7 +218,7 @@ if __name__ == '__main__':
     start_time = time.time()
 
     k_means = KMeansClustering(
-        documents, num_clusters=int(user_k_val), iterations=50, tries=20)
+        documents, num_clusters=int(user_k_val), iterations=50, tries=100)
     k_means.cluster()
 
     end_time = time.time() - start_time
