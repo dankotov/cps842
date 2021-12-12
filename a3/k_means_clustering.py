@@ -129,11 +129,17 @@ if __name__ == '__main__':
     (dict_ids, documents) = get_tfidf_vectors()
     end_time = time.time() - start_time
     print('Done loading values. Operation took', end_time, 'seconds')
-    print('Computing clusters')
+    user_k_val = input('Please provide the k value: ')
+    while(not user_k_val.isdigit()):
+        print('Please provide a valid (integer) k value')
+        user_k_val = input('Please provide the k value: ')
+    
+
+    print('Computing', user_k_val, 'clusters')
     start_time = time.time()
 
     k_means = KMeansClustering(
-        documents, num_clusters=5, iterations=50, tries=20)
+        documents, num_clusters=int(user_k_val), iterations=50, tries=20)
     k_means.cluster()
 
     end_time = time.time() - start_time
@@ -141,6 +147,8 @@ if __name__ == '__main__':
 
     clusters = match_id_to_document(
         dict_ids, k_means.get_cluster_matrix().tolist())
+
+    # print(clusters)
 
     for key in list(clusters.keys())[:20:]:
         print('Document', key, ' cluster: ', clusters[key])
