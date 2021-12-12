@@ -3,6 +3,10 @@ import numpy as np
 import random
 import json
 import time
+import os
+import matplotlib.pyplot as plt
+
+from numpy.core.fromnumeric import put
 
 
 class KMeansClustering:
@@ -29,6 +33,9 @@ class KMeansClustering:
         print('Done. \nRecomputing best result')
         self._compute_best_result()
         print('Done')
+
+    def get_number_of_documents(self):
+        return len(self.documents)
 
     def get_cluster_matrix(self) -> np.ndarray:
         return self.clusters
@@ -116,12 +123,72 @@ def get_tfidf_vectors(source='doc_tfidf_vectors.json'):
     return (dict_ids, np.array(dict_values))
 
 
+# def match_id_to_document(ids, similarities):
+#     clusters = {}
+#     for d_id, d_sim in zip(ids, similarities):
+#         clusters[d_id] = d_sim
+#     return clusters
+
 def match_id_to_document(ids, similarities):
+    id_to_title_json = open('./parse_results/documents_structured.json', 'r')
+    id_to_title = json.load(id_to_title_json)
+    id_to_title_json.close()
+
+    id_to_class = {
+        "bus":"business",
+        "ent":"entertainment",
+        "pol":"politics",
+        "spo":"sport",
+        "tec":"tech"
+    }
+
     clusters = {}
+
     for d_id, d_sim in zip(ids, similarities):
-        clusters[d_id] = d_sim
+        if not d_sim in clusters:
+            clusters[d_sim] = {}
+
+        if not "docs" in clusters[d_sim]:
+            clusters[d_sim]["docs"] = {}
+
+        if not "class_summary" in clusters[d_sim]:
+            clusters[d_sim]["class_summary"] = {}
+            for id in id_to_class:
+                clusters[d_sim]["class_summary"][id_to_class[id]] = 0
+
+        clusters[d_sim]["docs"][d_id] = {}
+        doc_class = id_to_class[d_id[0 : 3]]
+        clusters[d_sim]["docs"][d_id]['class'] = doc_class
+        clusters[d_sim]["docs"][d_id]['title'] = id_to_title[d_id]
+
+        clusters[d_sim]["class_summary"][doc_class] = clusters[d_sim]["class_summary"][doc_class] + 1
+
     return clusters
 
+def evaluate_purity(clusters, n_of_docs):
+    sum_majorities = 0
+    for cluster in clusters:
+        class_summary = clusters[cluster]["class_summary"]
+        classes = list(class_summary.keys())
+        members_n = list(class_summary.values())
+        majority_class = max(class_summary, key=class_summary.get)
+        majority_members_number = class_summary[majority_class]
+        print(f"\tMajority class for cluster {cluster} is '{majority_class}' with {majority_members_number} members")
+        sum_majorities += majority_members_number
+
+
+        fig = plt.figure(figsize=(10, 5))
+        plt.bar(classes, members_n)
+        plt.xlabel("Document Classes")
+        plt.ylabel("No. of members")
+        plt.title(f"Document distribution by class for cluster{cluster}")
+        os.makedirs(os.path.dirname(f"./clustering_results/visual/"), exist_ok=True)
+        plt.savefig(f'./clustering_results/visual/cluster{cluster}.png')
+    
+    purity = (1 / n_of_docs) * sum_majorities
+
+    return purity
+    
 
 if __name__ == '__main__':
     print('Loading values')
@@ -149,6 +216,22 @@ if __name__ == '__main__':
         dict_ids, k_means.get_cluster_matrix().tolist())
 
     # print(clusters)
+    os.makedirs(os.path.dirname("./clustering_results/clusters.json"), exist_ok=True)
+    with open("./clustering_results/clusters.json", "w") as clusters_file:
+        json.dump(clusters, clusters_file)
 
-    for key in list(clusters.keys())[:20:]:
-        print('Document', key, ' cluster: ', clusters[key])
+    print("Wrote clustered results to ./clustering_results/clusters.json")
+
+    print("\nEvaluating purity")
+    start_time = time.time()
+
+    purity = evaluate_purity(clusters, k_means.get_number_of_documents())
+
+    end_time = time.time() - start_time
+    print('Done evaluating purity. Operation took', end_time, 'seconds')
+    print(f'Purity is {purity}')
+
+    print('Wrote visual represantation of clustering results to ./clustering_results/visual/')
+
+    # for key in list(clusters.keys())[:20:]:
+    #     print('Document', key, ' cluster: ', clusters[key])

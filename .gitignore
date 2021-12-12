@@ -6,3 +6,4 @@ __pycache__/
 **/documents_structured.json
 __test.py
 test*
+**/clustering_results/
