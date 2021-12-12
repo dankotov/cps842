@@ -18,6 +18,7 @@ class KMeansClustering:
 
         self.centroids_per_try = []
         self.tightness_per_try = []
+        self.tightness_per_try_per_cluster = []
 
         self._init_centroids()
 
@@ -29,7 +30,8 @@ class KMeansClustering:
             self._single_pass()
             print('Try took', time.time()-start_time, 'seconds')
             self._compute_tightness_per_cluster()
-            print('Tightness in this try:', self.tightness_per_try[try_number])
+            print('Tightness in this try:',
+                  self.tightness_per_try_per_cluster[try_number])
         print('Done. \nRecomputing best result')
         self._compute_best_result()
         print('Done')
@@ -53,6 +55,7 @@ class KMeansClustering:
                 self.centroids[centroid_num, :] - documents_in_cluster, axis=1)
             tightness.append(np.sum(distances))
         self.tightness_per_try.append(sum(tightness))
+        self.tightness_per_try_per_cluster.append(tightness)
 
     def _single_pass(self) -> None:
         for iteration_num in range(self.iterations):
@@ -135,11 +138,11 @@ def match_id_to_document(ids, similarities):
     id_to_title_json.close()
 
     id_to_class = {
-        "bus":"business",
-        "ent":"entertainment",
-        "pol":"politics",
-        "spo":"sport",
-        "tec":"tech"
+        "bus": "business",
+        "ent": "entertainment",
+        "pol": "politics",
+        "spo": "sport",
+        "tec": "tech"
     }
 
     clusters = {}
@@ -157,13 +160,14 @@ def match_id_to_document(ids, similarities):
                 clusters[d_sim]["class_summary"][id_to_class[id]] = 0
 
         clusters[d_sim]["docs"][d_id] = {}
-        doc_class = id_to_class[d_id[0 : 3]]
+        doc_class = id_to_class[d_id[0: 3]]
         clusters[d_sim]["docs"][d_id]['class'] = doc_class
         clusters[d_sim]["docs"][d_id]['title'] = id_to_title[d_id]
 
         clusters[d_sim]["class_summary"][doc_class] = clusters[d_sim]["class_summary"][doc_class] + 1
 
     return clusters
+
 
 def evaluate_purity(clusters, n_of_docs):
     sum_majorities = 0
@@ -173,22 +177,23 @@ def evaluate_purity(clusters, n_of_docs):
         members_n = list(class_summary.values())
         majority_class = max(class_summary, key=class_summary.get)
         majority_members_number = class_summary[majority_class]
-        print(f"\tMajority class for cluster {cluster} is '{majority_class}' with {majority_members_number} members")
+        print(
+            f"\tMajority class for cluster {cluster} is '{majority_class}' with {majority_members_number} members")
         sum_majorities += majority_members_number
-
 
         fig = plt.figure(figsize=(10, 5))
         plt.bar(classes, members_n)
         plt.xlabel("Document Classes")
         plt.ylabel("No. of members")
         plt.title(f"Document distribution by class for cluster{cluster}")
-        os.makedirs(os.path.dirname(f"./clustering_results/visual/"), exist_ok=True)
+        os.makedirs(os.path.dirname(
+            f"./clustering_results/visual/"), exist_ok=True)
         plt.savefig(f'./clustering_results/visual/cluster{cluster}.png')
-    
+
     purity = (1 / n_of_docs) * sum_majorities
 
     return purity
-    
+
 
 if __name__ == '__main__':
     print('Loading values')
@@ -200,7 +205,6 @@ if __name__ == '__main__':
     while(not user_k_val.isdigit()):
         print('Please provide a valid (integer) k value')
         user_k_val = input('Please provide the k value: ')
-    
 
     print('Computing', user_k_val, 'clusters')
     start_time = time.time()
@@ -216,7 +220,8 @@ if __name__ == '__main__':
         dict_ids, k_means.get_cluster_matrix().tolist())
 
     # print(clusters)
-    os.makedirs(os.path.dirname("./clustering_results/clusters.json"), exist_ok=True)
+    os.makedirs(os.path.dirname(
+        "./clustering_results/clusters.json"), exist_ok=True)
     with open("./clustering_results/clusters.json", "w") as clusters_file:
         json.dump(clusters, clusters_file)
 
@@ -231,7 +236,7 @@ if __name__ == '__main__':
     print('Done evaluating purity. Operation took', end_time, 'seconds')
     print(f'Purity is {purity}')
 
-    print('Wrote visual represantation of clustering results to ./clustering_results/visual/')
+    print('Wrote visual representation of clustering results to ./clustering_results/visual/')
 
     # for key in list(clusters.keys())[:20:]:
     #     print('Document', key, ' cluster: ', clusters[key])
