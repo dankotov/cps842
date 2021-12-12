@@ -198,8 +198,19 @@ def match_id_to_document(ids, similarities, documents):
     return clusters
 
 
+def delete_existing_figures():
+    path = './clustering_results/visual/'
+    for file_name in os.listdir(path):
+        try:
+            os.remove(path+file_name)
+        except FileNotFoundError:
+            pass
+
+
 def evaluate_purity(clusters, n_of_docs):
     sum_majorities = 0
+    delete_existing_figures()
+
     for cluster in clusters:
         class_summary = clusters[cluster]["class_summary"]
         classes = list(class_summary.keys())
