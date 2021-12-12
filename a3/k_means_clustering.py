@@ -164,7 +164,8 @@ def match_id_to_document(ids, similarities, documents):
         if not d_sim in cluster_combined_tfidf:
             cluster_combined_tfidf[d_sim] = document_tfidf
         else:
-            cluster_combined_tfidf[d_sim] = cluster_combined_tfidf[d_sim] + document_tfidf
+            cluster_combined_tfidf[d_sim] = cluster_combined_tfidf[d_sim] + \
+                document_tfidf
 
         if not "docs" in clusters[d_sim]:
             clusters[d_sim]["docs"] = {}
@@ -180,7 +181,6 @@ def match_id_to_document(ids, similarities, documents):
         clusters[d_sim]["docs"][d_id]['title'] = id_to_title[d_id]
 
         clusters[d_sim]["class_summary"][doc_class] = clusters[d_sim]["class_summary"][doc_class] + 1
-    
 
     dictionary_json = open('./parse_results/dictionary.json', 'r')
     Dictionary = json.load(dictionary_json)
@@ -192,8 +192,8 @@ def match_id_to_document(ids, similarities, documents):
         highest_tfidfs_pos = tmp[:5]
         clusters[cluster]["highest_idfs"] = []
         for tfidf_pos in highest_tfidfs_pos:
-            clusters[cluster]["highest_idfs"].append(list(Dictionary.keys())[tfidf_pos])
-
+            clusters[cluster]["highest_idfs"].append(
+                list(Dictionary.keys())[tfidf_pos])
 
     return clusters
 
@@ -239,7 +239,7 @@ if __name__ == '__main__':
     start_time = time.time()
 
     k_means = KMeansClustering(
-        documents, num_clusters=int(user_k_val), iterations=50, tries=100)
+        documents, num_clusters=int(user_k_val), iterations=50, tries=20)
     k_means.cluster()
 
     end_time = time.time() - start_time
