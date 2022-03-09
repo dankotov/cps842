@@ -1,4 +1,4 @@
-# CPS842, Project, Vladislav Brovikov 500864655, Daniyil Kotov 500877422
+# CPS842, Project, Vladislav Brovikov, Daniyil Kotov
 
 Our program was written/tested in Python v3.9.1
 Run the program in the following order:
